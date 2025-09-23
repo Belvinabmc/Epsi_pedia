@@ -1,0 +1,19 @@
+# Python
+_pycache_/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual env
+.venv/
+
+# SQLite database
+storage/database.db
+
+# Logs
+storage/security.log
+
+# Build
+dist/
+build/
+*.specgit 
