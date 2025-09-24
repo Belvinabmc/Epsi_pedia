@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional, Mapping, Any
+from datetime import datetime
 
 # Table FR attendue : articles
 # Colonnes FR : id, titre, contenu, date, categorie_nom (NULL autorisé)
@@ -17,7 +18,7 @@ class Article:
     id: int
     title: str
     content: str
-    created_at: int                # epoch seconds
+    created_at: datetime               # epoch seconds
     category_name: Optional[str] = None  # FK vers categories.nom
 
     @staticmethod
