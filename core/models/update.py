@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Mapping, Any
+from datetime import datetime
 
 # Table FR attendue : updates
 # Colonnes FR : id, resume, date
@@ -14,7 +15,7 @@ UPDATE_DB_COLS = {
 class Update:
     id: int
     summary: str
-    created_at: int                # epoch seconds
+    created_at: datetime                # epoch seconds
 
     @staticmethod
     def from_row(row: Mapping[str, Any]) -> "Update":
