@@ -3,7 +3,7 @@
 import tkinter as tk
 from tkinter import ttk
 import sqlite3
-from database import DB_NAME
+DB_NAME = "database.db"
 
 
 def ouvrir_interface(param=None):
@@ -126,8 +126,12 @@ def ouvrir_interface(param=None):
     # Titre de la section contenu
     lbl_contenu_titre = tk.Label(frame_right, text="Contenu du tuto", font=("Segoe UI", 16, "bold"), bg="#fff", fg="#222")
     lbl_contenu_titre.pack(pady=(20, 10))
+    image_label = tk.Label(frame_right, bg="#fff")
+    image_label.pack(padx=20, pady=(0,10))
     contenu_text = tk.Text(frame_right, wrap="word", font=("Segoe UI", 12), bg="#fff", fg="#222", relief="flat", height=25, width=80, state="disabled")
     contenu_text.pack(padx=20, pady=10, fill="both", expand=True)
+
+    images_tuto_dir = "asset/images_tuto/"
 
     # Charger catégories depuis la base
     conn = sqlite3.connect(DB_NAME)
@@ -144,21 +148,37 @@ def ouvrir_interface(param=None):
 
         conn = sqlite3.connect(DB_NAME)
         cur = conn.cursor()
-        cur.execute("SELECT id, titre, contenu FROM tutos WHERE categorie_id=?", (cat_id,))
+        cur.execute("SELECT id, titre, contenu, image_path FROM tutos WHERE categorie_id=?", (cat_id,))
         tutos = cur.fetchall()
         conn.close()
 
-        def afficher_contenu(titre, contenu):
+        def afficher_contenu(titre, contenu, image_path):
             contenu_text.config(state="normal")
             contenu_text.delete("1.0", "end")
             contenu_text.insert("1.0", f"{titre}\n\n{contenu}")
             contenu_text.config(state="disabled")
             lbl_contenu_titre.config(text=titre)
+            # Afficher l'image si elle existe
+            if image_path:
+                import os
+                if not os.path.isabs(image_path):
+                    image_path = os.path.join(images_tuto_dir, image_path)
+                try:
+                    from PIL import Image, ImageTk
+                    img = Image.open(image_path)
+                    img = img.resize((320, 180), Image.LANCZOS)
+                    photo = ImageTk.PhotoImage(img)
+                    image_label.config(image=photo, text="")
+                    image_label.image = photo
+                except Exception as e:
+                    image_label.config(image="", text=f"Image non trouvée : {os.path.basename(image_path)}", fg="red")
+            else:
+                image_label.config(image="", text="")
 
-        for tuto_id, titre, contenu in tutos:
+        for tuto_id, titre, contenu, image_path in tutos:
             btn_titre = ttk.Button(frame_center, text=titre, style="TButton")
             btn_titre.pack(fill="x", padx=20, pady=8)
-            btn_titre.bind("<Button-1>", lambda e, t=titre, c=contenu: afficher_contenu(t, c))
+            btn_titre.bind("<Button-1>", lambda e, t=titre, c=contenu, ip=image_path: afficher_contenu(t, c, ip))
 
     # Style spécial pour les boutons de catégories
     style.configure("Cat.TButton", font=("Segoe UI", 14, "bold"), background="#3b82f6", foreground="#fff", borderwidth=0, padding=10)

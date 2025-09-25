@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import sqlite3
-from database import DB_NAME
+DB_NAME = "database.db"
 from interface import ouvrir_interface
 
 def ouvrir_accueil():
@@ -17,6 +17,20 @@ def ouvrir_accueil():
         background=[("active", "#2563eb")],
         foreground=[("active", "#fff")]
     )
+
+    # Ajout du logo en haut à gauche
+    import os
+    from PIL import Image, ImageTk
+    logo_path = os.path.join(os.path.dirname(__file__), "asset", "images", "logo.sheald.png")
+    try:
+        logo_img = Image.open(logo_path)
+        logo_img = logo_img.resize((80, 80), Image.LANCZOS)
+        logo_photo = ImageTk.PhotoImage(logo_img)
+        logo_label = tk.Label(root, image=logo_photo, bg="#f5f6fa")
+        logo_label.image = logo_photo
+        logo_label.place(x=20, y=20)
+    except Exception as e:
+        pass
 
     lbl_title = tk.Label(root, text="Bienvenue sur Epsipédia !", font=("Segoe UI", 28, "bold"), bg="#f5f6fa", fg="#222")
     lbl_title.pack(pady=(40, 10))
@@ -62,13 +76,14 @@ def ouvrir_accueil():
     # Images associées aux catégories (doit correspondre à l'ordre)
     import os
     from PIL import Image, ImageTk
+    base_dir = os.path.dirname(__file__)
     image_paths = [
-        os.path.join(os.getcwd(), "asset", "images", "1703350621_27_La-survie-en-milieu-naturel-comme-therapie-avec-Dan-Coyle.jpeg"),
-        os.path.join(os.getcwd(), "asset", "images", "Nourriture et ressource.jpg"),
-        os.path.join(os.getcwd(), "asset", "images", "secour.jpg"),
-        os.path.join(os.getcwd(), "asset", "images", "COMM.png"),
-        os.path.join(os.getcwd(), "asset", "images", "Bricolage.jpg"),
-        os.path.join(os.getcwd(), "asset", "images", "COMM.png")
+        os.path.join(base_dir, "asset", "images", "1703350621_27_La-survie-en-milieu-naturel-comme-therapie-avec-Dan-Coyle.jpeg"),
+        os.path.join(base_dir, "asset", "images", "Nourriture et ressource.jpg"),
+        os.path.join(base_dir, "asset", "images", "secour.jpg"),
+        os.path.join(base_dir, "asset", "images", "energie-solaire.jpg"),
+        os.path.join(base_dir, "asset", "images", "Bricolage.jpg"),
+        os.path.join(base_dir, "asset", "images", "COMM.png")
     ]
     images = []
     for path in image_paths:
