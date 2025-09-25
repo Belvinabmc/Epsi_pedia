@@ -66,14 +66,14 @@ def ouvrir_interface(param=None):
         cur = conn.cursor()
         if mot_cle:
             cur.execute("""
-                SELECT t.titre, t.contenu, c.nom
+                SELECT t.titre, t.contenu, t.image_path, c.nom
                 FROM tutos t
                 LEFT JOIN categories c ON t.categorie_id = c.id
                 WHERE t.titre LIKE ?
             """, (f"%{mot_cle}%",))
         else:
             cur.execute("""
-                SELECT t.titre, t.contenu, c.nom
+                SELECT t.titre, t.contenu, t.image_path, c.nom
                 FROM tutos t
                 LEFT JOIN categories c ON t.categorie_id = c.id
             """)
@@ -81,26 +81,45 @@ def ouvrir_interface(param=None):
         conn.close()
         # Regrouper les tutos par catégorie
         cat_dict = {}
-        for titre, contenu, cat in tutos:
+        for titre, contenu, image_path, cat in tutos:
             if cat not in cat_dict:
                 cat_dict[cat] = []
-            cat_dict[cat].append((titre, contenu))
-        def afficher_contenu(titre, contenu, cat):
+            cat_dict[cat].append((titre, contenu, image_path))
+        def afficher_contenu(titre, contenu, image_path, cat):
             contenu_text.config(state="normal")
             contenu_text.delete("1.0", "end")
             contenu_text.insert("1.0", f"Catégorie : {cat}\n\n{titre}\n\n{contenu}")
             contenu_text.config(state="disabled")
             lbl_contenu_titre.config(text=titre)
+            # Afficher l'image si elle existe
+            if image_path:
+                import os
+                images_tuto_dir = "asset/images_tuto/"
+                if not os.path.isabs(image_path):
+                    image_path_full = os.path.join(images_tuto_dir, image_path)
+                else:
+                    image_path_full = image_path
+                try:
+                    from PIL import Image, ImageTk
+                    img = Image.open(image_path_full)
+                    img = img.resize((480, 270), Image.LANCZOS)
+                    photo = ImageTk.PhotoImage(img)
+                    image_label.config(image=photo, text="")
+                    image_label.image = photo
+                except Exception as e:
+                    image_label.config(image="", text=f"Image non trouvée : {os.path.basename(image_path_full)}", fg="red")
+            else:
+                image_label.config(image="", text="")
         if cat_dict:
             for cat, tutos_cat in cat_dict.items():
                 frame_cat = tk.Frame(frame_center, bg="#e0e7ff", bd=2, relief="solid")
                 frame_cat.pack(fill="x", padx=18, pady=12)
                 lbl_cat = tk.Label(frame_cat, text=cat, font=("Segoe UI", 13, "bold"), bg="#e0e7ff", fg="#2563eb")
                 lbl_cat.pack(anchor="w", padx=8, pady=(6,4))
-                for titre, contenu in tutos_cat:
+                for titre, contenu, image_path in tutos_cat:
                     btn_titre = ttk.Button(frame_cat, text=titre, style="TButton")
                     btn_titre.pack(fill="x", padx=16, pady=4)
-                    btn_titre.bind("<Button-1>", lambda e, t=titre, c=contenu, cat=cat: afficher_contenu(t, c, cat))
+                    btn_titre.bind("<Button-1>", lambda e, t=titre, c=contenu, ip=image_path, cat=cat: afficher_contenu(t, c, ip, cat))
         else:
             lbl = tk.Label(frame_center, text="Aucun tuto trouvé.", bg="#f5f6fa", fg="#888", font=("Segoe UI", 12))
             lbl.pack(pady=20)
