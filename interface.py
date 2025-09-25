@@ -36,9 +36,20 @@ def ouvrir_interface(param=None):
     btn_accueil.pack(fill="x", padx=14, pady=(18, 24))
 
 
-    # Frame recherche + liste tutos
-    frame_center = tk.Frame(main_frame, bg="#f5f6fa")
-    frame_center.pack(side="left", fill="both", expand=True)
+
+    # Frame avec scrollbar pour la liste des tutos
+    frame_center_container = tk.Frame(main_frame, bg="#f5f6fa")
+    frame_center_container.pack(side="left", fill="both", expand=True)
+    canvas_center = tk.Canvas(frame_center_container, bg="#f5f6fa", highlightthickness=0)
+    scrollbar_center = tk.Scrollbar(frame_center_container, orient="vertical", command=canvas_center.yview)
+    frame_center = tk.Frame(canvas_center, bg="#f5f6fa")
+    frame_center.bind(
+        "<Configure>", lambda e: canvas_center.configure(scrollregion=canvas_center.bbox("all"))
+    )
+    canvas_center.create_window((0, 0), window=frame_center, anchor="nw")
+    canvas_center.configure(yscrollcommand=scrollbar_center.set)
+    canvas_center.pack(side="left", fill="both", expand=True)
+    scrollbar_center.pack(side="right", fill="y")
 
     # Barre de recherche
     search_frame = tk.Frame(frame_center, bg="#f5f6fa")
@@ -97,19 +108,25 @@ def ouvrir_interface(param=None):
     search_btn = ttk.Button(search_frame, text="Rechercher", command=lancer_recherche)
     search_btn.pack(side="left")
 
-    # Si param est un mot-clé, lance la recherche automatiquement
-    if param is not None and isinstance(param, str):
-        search_var.set(param)
-        root.after(100, lancer_recherche)
+    # Si param est un id de catégorie, affiche les tutos de cette catégorie
+    def afficher_param():
+        if param is not None:
+            # Si param est un entier ou une chaîne représentant un entier
+            if isinstance(param, int) or (isinstance(param, str) and param.isdigit()):
+                afficher_tutos(int(param))
+            elif isinstance(param, str):
+                search_var.set(param)
+                root.after(100, lancer_recherche)
+    root.after(0, afficher_param)
 
-    # Frame affichage contenu (plus grande)
-    frame_right = tk.Frame(main_frame, width=500, bg="#fff", relief="groove", bd=2)
+    # Frame affichage contenu (plus grande vers la gauche)
+    frame_right = tk.Frame(main_frame, width=700, bg="#fff", relief="groove", bd=2)
     frame_right.pack(side="right", fill="y")
 
     # Titre de la section contenu
     lbl_contenu_titre = tk.Label(frame_right, text="Contenu du tuto", font=("Segoe UI", 16, "bold"), bg="#fff", fg="#222")
     lbl_contenu_titre.pack(pady=(20, 10))
-    contenu_text = tk.Text(frame_right, wrap="word", font=("Segoe UI", 12), bg="#fff", fg="#222", relief="flat", height=25, width=60, state="disabled")
+    contenu_text = tk.Text(frame_right, wrap="word", font=("Segoe UI", 12), bg="#fff", fg="#222", relief="flat", height=25, width=80, state="disabled")
     contenu_text.pack(padx=20, pady=10, fill="both", expand=True)
 
     # Charger catégories depuis la base
