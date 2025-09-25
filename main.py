@@ -4,14 +4,15 @@ import os
 from tkinter import messagebox
 from PIL import Image, ImageTk
 from auth import verifier_code, est_admin
-from interface import ouvrir_interface
+
+from accueil import ouvrir_accueil
 
 def connexion():
     code = entry_code.get()
     if verifier_code(code):
         messagebox.showinfo("Succès", "Accès autorisé ✅")
         root.destroy()
-        ouvrir_interface()
+        ouvrir_accueil()
     else:
         messagebox.showerror("Erreur", "Code invalide ❌")
 
